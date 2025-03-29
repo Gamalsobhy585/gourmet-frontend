@@ -1,5 +1,7 @@
 {
   "product": {
+    "add_new":"اضافة منتج جديد",
+
     "title": "إدارة المنتجات",
     "delete_success": "تم حذف المنتج بنجاح",
     "delete_error": "فشل في حذف المنتج",
@@ -19,16 +21,21 @@
     "sku_label": "الرمز SKU",
     "price_label": "السعر",
     "price_store_b_label": "سعر المتجر ب",
-    "id_label": "المعرف",
+    "id_label": "الرقم التعريفي",
     "update_button": "تحديث المنتج",
     "add_button": "إضافة منتج",
     "name_placeholder": "أدخل اسم المنتج",
     "description_placeholder": "أدخل وصف المنتج",
     "price_placeholder": "أدخل سعر المنتج",
     "category_placeholder": "اختر تصنيفًا",
-    "sku_placeholder": "أدخل الرمز SKU"
+    "sku_placeholder": "أدخل الرمز SKU",
+    "create_date": "تاريخ الإنشاء",
+    "enter_create_date": "أدخل تاريخ الإنشاء",
+    "price": "السعر",
+    "enter_price": "أدخل السعر"
   },
   "common": {
+    "all":"الجميع",
     "filter": "تصفية",
     "clear": "مسح",
     "apply": "تطبيق",

@@ -153,14 +153,13 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
       cell: ({ row, table }: { row: Row<Product>; table: any }) => {
         const onDelete = table.options.meta?.onDelete;
         const onEdit = table.options.meta?.onEdit;
-        const onShow = table.options.meta?.onShow;
         
         return (
           <div className="flex items-center gap-2 justify-center text-primary">
             <SquarePen
               size={24}
               className="cursor-pointer hover:text-blue-500"
-              onClick={() => onEdit && onEdit(row.original)}
+              onClick={() => onEdit && onEdit(String(row.original))}
               aria-label={t("common.edit")}
             />
             <Eye

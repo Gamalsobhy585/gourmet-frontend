@@ -1,5 +1,6 @@
 {
   "product": {
+    "add_new":"add new product",
     "title": "Product Management",
     "delete_success": "Product deleted successfully",
     "delete_error": "Failed to delete product",
@@ -26,9 +27,15 @@
     "description_placeholder": "Enter product description",
     "price_placeholder": "Enter product price",
     "category_placeholder": "Select a category",
-    "sku_placeholder": "Enter SKU"
+    "sku_placeholder": "Enter SKU",
+    "create_date": "create date ",
+    "enter_create_date": "Enter create date",
+    "price": "price",
+    "enter_price": "enter price "
   },
   "common": {
+    "all":"all",
+
     "filter": "Filter",
     "clear": "Clear",
     "apply": "Apply",
@@ -50,5 +57,8 @@
     "price_min": "Price must be at least 0",
     "category_required": "Category is required",
     "SKU_required": "SKU is required"
-  }
+  
+  },
+  "products":"products"
+
 }
