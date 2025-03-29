@@ -2,7 +2,6 @@ import { ProductsTable } from "../features/products/products-table";
 import {
   deleteProduct,
   createProduct,
-  getProduct,
   updateProduct,
   searchProductsWithFilters
 
@@ -22,10 +21,8 @@ const Products = () => {
   const [filters, setFilters] = useState<{
     category?: string;
     sku?: string;
-    price?: string;
-    price_range?: string;
+    price?: number;
     created_date?: string;
-    created_date_range?: string;
     sort_by?: string;
     sort_direction?: 'asc' | 'desc';
   }>({});
@@ -38,37 +35,16 @@ const Products = () => {
       page: currentPage,
       query: searchQuery,
       category: filters.category,
-      priceRange: filters.price_range
-        ? { min: Number(filters.price_range.split("-")[0]), max: Number(filters.price_range.split("-")[1]) }
-        : undefined,
-      dateRange: filters.created_date_range
-        ? { start: filters.created_date_range.split(" to ")[0], end: filters.created_date_range.split(" to ")[1] }
-        : undefined,
+      sku: filters.sku,
+      price: filters.price,
+      created_date: filters.created_date,
       sortBy: filters.sort_by,
       sortDirection: filters.sort_direction,
     }),
   });
   
 
-  const showMutation = useMutation({
-    mutationFn: getProduct,
-    onSuccess: (data) => {
-      setSelectedProduct({
-        id: data.id,
-        name: data.name,
-        sku: data.sku, 
-        price: data.price,
-        description:data.description,
-        price_in_store_b: data.price_in_store_B,
-        category_id: data.category_id,
-        category: data.category,
-        created_date: data.created_date,
-      });
-    },
-    onError: (error) => {
-      toast.error(`Error fetching product details ${error}`);
-    },
-  });
+
   
 
 
@@ -121,9 +97,7 @@ const Products = () => {
     }));
   };
 
-  const handleShow = (id: string) => {
-    showMutation.mutate(id);
-  };
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: UpdateProductVariables) =>
       updateProduct(id, data),
@@ -150,7 +124,6 @@ const Products = () => {
         onSearchChange={handleSearchChange}
         onDelete={handleDelete}
         onAdd={addMutation.mutate}
-        onShow={(params) => handleShow(params.id)}
         onUpdate={(params) => updateMutation.mutate(params)}
         selectedProduct={selectedProduct}
         setSelectedProduct={setSelectedProduct}

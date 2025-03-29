@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import { getProductColumns } from "./columns";
-import { Product } from "./type";
+import { Product, ProductFilterParams } from "./type";
 import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -41,25 +41,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { format } from "date-fns";
-import { Calendar } from "../../components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../components/ui/popover";
-import { cn } from "../../lib/utils";
+
 import { productSchema } from "./schemas";
 import { z } from "zod";
 import { AddProduct } from "./add-product";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { DateRange } from "react-day-picker";
+import { getCategories } from "./api";
+import { useQuery } from "@tanstack/react-query";
 
 
 
-interface ProductsTableProps {
-    
- }
 
   interface ProductsTableProps {
     products: Product[];
@@ -70,11 +61,8 @@ interface ProductsTableProps {
     onPageChange: (page: number) => void;
     searchQuery: string;
     onSearchChange: (query: string) => void;
-    onFilterChange: (filters: object) => void;
-    onSortChange: (field: string, direction: 'asc' | 'desc') => void;
     onDelete: (id: string) => void;
     selectedProduct: Product | null;
-    onShow: (params:{id: string}) => void;
     setSelectedProduct: React.Dispatch<React.SetStateAction<Product | null>>;
     onUpdate: (params: { id: string; data: z.infer<typeof productSchema> }) => void;
     onAdd: (product: {
@@ -84,8 +72,17 @@ interface ProductsTableProps {
       sku: string;
       category_id: number;
     }) => void;
+    onFilterChange: (filters: object) => void;
+    onSortChange: (field: string, direction: 'asc' | 'desc') => void;
+    filters: {
+        category?: string;
+        sku?: string;
+        price?: number;
+        created_date?: string;
+        sort_by?: string;
+        sort_direction?: 'asc' | 'desc';
+    };
     
-    filters: any;
   }
 
   
@@ -102,7 +99,6 @@ export function ProductsTable({
   onFilterChange,
   onSortChange,
   onAdd,
-  onShow,
   onDelete,
   selectedProduct,
   setSelectedProduct,
@@ -114,21 +110,27 @@ export function ProductsTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   const [showFilters, setShowFilters] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
-
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+  });
+  useEffect(() => {
+    if (categoriesData?.data && Array.isArray(categoriesData.data)) {
+      const apiCategories = categoriesData.data.map((category: {name: string}) => category.name);
+      console.log(apiCategories);
+      
+      setCategories(apiCategories);
+    }
+  }, [categoriesData]);
   
-  
-  const [priceRange, setPriceRange] = useState<{
-    min: string;
-    max: string;
-  }>({ min: "", max: "" });
   const [skuFilter, setSkuFilter] = useState("");
+  const [priceFilter, setPriceFilter] = useState(0);
+  const [createDateFilter, setCreateDateFilter] = useState("");
 
   useEffect(() => {
     if (products.length > 0) {
@@ -162,35 +164,38 @@ export function ProductsTable({
     },
     meta: {
       onDelete: (id: string) => onDelete(id),
-      onEdit: (product: Product) => setSelectedProduct(product),
-      onShow: (product: Product) => setSelectedProduct(product),
-    },
+      onEdit: (product: Product) => {
+        setSelectedProduct(product);
+        setIsEditDialogOpen(true);
+      },
+           }
   });
 
   const applyFilters = () => {
-    const newFilters: any = {};
+    console.log("Applying filters with:", {
+      category: filters.category,
+      sku: skuFilter,
+      price: priceFilter,
+      created_date: createDateFilter
+    });
     
-    // Category filter
-    if (filters.category) {
+    const newFilters: Partial<ProductFilterParams> = {};
+    
+    if (filters.category && filters.category !== 'all') {
       newFilters.category = filters.category;
     }
     
-    // sku filter
     if (skuFilter) {
       newFilters.sku = skuFilter;
     }
     
-    // Price range filter
-    if (priceRange.min && priceRange.max) {
-      newFilters.price_range = `${priceRange.min}-${priceRange.max}`;
+    if (priceFilter) {
+      newFilters.price = Number(priceFilter);
     }
     
-    // Date range filter
-    if (dateRange?.from && dateRange?.to) {
-      newFilters.created_date_range = `${format(dateRange.from, "yyyy-MM-dd")} to ${format(dateRange.to, "yyyy-MM-dd")}`;
+    if (createDateFilter) {
+      newFilters.created_date = createDateFilter;
     }
-  
-  
     
     onFilterChange(newFilters);
     setShowFilters(false);
@@ -198,14 +203,16 @@ export function ProductsTable({
 
   const clearFilters = () => {
     setSkuFilter("");
-    setPriceRange({ min: "", max: "" });
-    setDateRange(undefined); 
+    setPriceFilter(0);
+    setCreateDateFilter("");
+    
     onFilterChange({
       category: undefined,
       sku: undefined,
-      price_range: undefined,
-      created_date_range: undefined
+      price: undefined,
+      created_date: undefined
     });
+    
     setShowFilters(false);
   };
 
@@ -213,165 +220,180 @@ export function ProductsTable({
     return <div className="text-center text-red-500">{error}</div>;
   }
 
+  useEffect(() => {
+    console.log("showFilters state changed:", showFilters);
+  }, [showFilters]);
+  
+  useEffect(() => {
+    console.log("Filters changed:", filters);
+  }, [filters]);
+
 
   return (
     <Card>
-    <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle>{t("products")}</CardTitle>
-      <div className="flex gap-2">
-        <div className="flex w-full max-w-sm items-center space-x-2">
-          <Input
-            placeholder={t("product.search_placeholder")}
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        <Button 
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>{t("products")}</CardTitle>
+
+        {/* filter */}
+        <div className="flex gap-2">
+          <div className="flex w-full max-w-sm items-center space-x-2">
+            <Input
+              placeholder={t("product.search_placeholder")}
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <Button 
           variant="outline" 
           className="gap-2"
-          onClick={() => setShowFilters(true)}
+          onClick={() => {
+            console.log("Filter button clicked! Before update:", showFilters);
+            // Instead of directly setting to true, toggle it
+            setShowFilters(prev => !prev);
+          }}
         >
           <Filter size={16} />
           {t("common.filter")}
-        </Button>
-      </div>
-    </CardHeader>
-    <CardContent>
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          </Button>
         </div>
-      ) : (
-        <>
-          <div className="rounded-md border">
-          <div className="flex justify-between items-center py-4">
-      <Input
-          placeholder={t("product.search_placeholder")}
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className={`max-w-sm ${isRTL ? "text-right" : "text-left"}`}
-        />
-        <div className="flex items-center gap-1">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <CirclePlus
-                stroke="#DF0612"
-                size={30}
-                className="cursor-pointer"
-                aria-label={t("product.add_new")}
-              />
-            </DialogTrigger>
-            <DialogContent className="w-1/3 md:rounded-3xl">
-              <AddProduct onAdd={onAdd} />
-            </DialogContent>
-          </Dialog>
-          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-
-        <DialogContent className="w-1/3 md:rounded-3xl">
-          <AddProduct 
-            isViewMode={true} 
-            initialData={selectedProduct} 
-            onShow={onShow}
-          />
-        </DialogContent>
-          </Dialog>
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="rounded-md border">
+              <div className="flex justify-between items-center py-4">
+                <div className="flex items-center gap-1">
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <CirclePlus
+                        stroke="#DF0612"
+                        size={30}
+                        className="cursor-pointer ms-4"
+                        aria-label={t("product.add_new")}
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="w-1/3 md:rounded-3xl">
+                      <AddProduct onAdd={onAdd} />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+              
+              <Table>
+                {/* Table content remains the same */}
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={header.id}>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center"
+                      >
+                        {t("common.no_results")}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="text-sm text-muted-foreground">
+                {t("common.showing_results", {
+                  from: (currentPage - 1) * 20 + 1,
+                  to: Math.min(currentPage * 20, products.length),
+                  total: products.length,
+                })}
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {t("common.previous")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPageChange(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+                >
+                  {t("common.next")}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+  
+     
+  
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="w-1/3 md:rounded-3xl">
           <AddProduct
-          isEditMode={true}
-          initialData={selectedProduct}
-          onSubmit={(data) =>
-            selectedProduct && onUpdate({ id: selectedProduct.id, data })
-           }
-           />
+            isEditMode={true}
+            initialData={selectedProduct}
+            onSubmit={(data) =>
+              selectedProduct && onUpdate({ id: selectedProduct.id, data })
+            }
+          />
         </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      {t("common.no_results")}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="flex items-center justify-between space-x-2 py-4">
-            <div className="text-sm text-muted-foreground">
-              {t("common.showing_results", {
-                from: (currentPage - 1) * 20 + 1,
-                to: Math.min(currentPage * 20, products.length),
-                total: products.length,
-              })}
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                {t("common.previous")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-              >
-                {t("common.next")}
-              </Button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Filter Dialog */}
-      <Dialog open={showFilters} onOpenChange={setShowFilters}>
-        <DialogContent className="sm:max-w-[425px]">
+      </Dialog>
+            {/* filter Dialog */}
+            <Dialog 
+          open={showFilters} 
+          onOpenChange={(open) => {
+            console.log("Dialog onOpenChange:", open);
+            try {
+              setShowFilters(open);
+            } catch (error) {
+              console.error("Error in Dialog:", error);
+              setShowFilters(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-[425px] z-[100]">
           <DialogHeader>
             <DialogTitle>{t("common.filter")}</DialogTitle>
             <DialogDescription>
@@ -384,21 +406,33 @@ export function ProductsTable({
                 {t("product.category")}
               </label>
               <Select 
-                onValueChange={value => onFilterChange({ category: value })}
-                value={filters.category || ""}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder={t("product.select_category")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{t("common.all")}</SelectItem>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              onValueChange={value => onFilterChange({ 
+                category: value === 'all' ? undefined : value 
+              })}
+              value={filters.category || "all"}
+              disabled={categoriesLoading}
+            >
+
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={categoriesLoading ? 
+                  t("common.loading") : 
+                  t("product.select_category")} 
+                />
+              </SelectTrigger>
+              <SelectContent 
+              className="z-[150]" 
+              position="popper" 
+            >
+              <SelectItem value="all">{t("common.all")}</SelectItem>
+              {categories
+                .filter(category => category && category.trim() !== '')
+                .map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label className="text-right col-span-1">
@@ -413,58 +447,33 @@ export function ProductsTable({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label className="text-right col-span-1">
-                {t("product.price_range")}
+                {t("product.price")}
               </label>
-              <div className="col-span-3 flex gap-2">
-                <Input
-                  type="number"
-                  placeholder={t("common.min")}
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                />
-                <Input
-                  type="number"
-                  placeholder={t("common.max")}
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                />
-              </div>
+              <Input
+                placeholder={t("product.enter_price")}
+                className="col-span-3"
+                value={priceFilter}
+                type="number"
+                onChange={(e) => setPriceFilter(Number(e.target.value))}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right col-span-1">
-                {t("product.date_range")}
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                <Button
-                variant={"outline"}
-                className={cn(
-                  "col-span-3 justify-start text-left font-normal",
-                  !dateRange?.from && "text-muted-foreground"
-                )}
-              >
-                {dateRange?.from ? (
-                  dateRange.to ? (
-                    `${format(dateRange.from, "PPP")} - ${format(dateRange.to, "PPP")}`
-                  ) : (
-                    format(dateRange.from, "PPP")
-                  )
-                ) : (
-                  t("product.select_date_range")
-                )}
-              </Button>
-
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={setDateRange} // No type error now!
-                initialFocus
+            <label className="text-right col-span-1">
+              {t("product.create_date")}
+            </label>
+            <div className="col-span-3">
+              <Input
+                placeholder={t("product.enter_create_date")}
+                type="date"
+                className="w-full"
+                value={createDateFilter}
+                onChange={(e) => setCreateDateFilter(e.target.value)}
               />
-                </PopoverContent>
-              </Popover>
             </div>
+          </div>
+
+
+           
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={clearFilters}>
@@ -476,7 +485,6 @@ export function ProductsTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </CardContent>
-  </Card>
-);
+    </Card>
+  );
 }

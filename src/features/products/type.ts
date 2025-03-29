@@ -23,9 +23,7 @@ export interface Product {
     category?: string;
     sku?: string;
     price?: number;
-    price_range?: string;
     created_date?: string;
-    created_date_range?: string;
   }
 
 

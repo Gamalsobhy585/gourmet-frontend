@@ -82,7 +82,6 @@ export function AddProduct({
         className="space-y-4 mt-4"
         onSubmit={form.handleSubmit(onSubmitHandler)}
       >
-        {/* Name Field */}
         <FormField
           name="name"
           control={form.control}
