@@ -124,7 +124,7 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
       ),
     },
     {
-      accessorKey: "price_in_store_B",
+      accessorKey: "price_in_store_b",
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -136,9 +136,9 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
       ),
       cell: ({ row }) => (
         <div className={`${isRTL ? "text-center" : "text-center"}`}>
-          {typeof row.getValue("price_in_store_B") === 'number' 
-            ? `$${(row.getValue("price_in_store_B") as number).toFixed(2)}` 
-            : row.getValue("price_in_store_B")}
+          {typeof row.getValue("price_in_store_b") === 'number' 
+            ? `${(row.getValue("price_in_store_b") as number).toFixed(2)}` 
+            : row.getValue("price_in_store_b")}
         </div>
       ),
     },

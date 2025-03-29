@@ -16,31 +16,40 @@ const buildUrl = (endpoint: string, params: Record<string, any>) => {
   
   return url.toString();
 };
+console.log("Final API URL:", buildUrl('/products', { page: 1, per_page: 20 }));
 
 const apiFetch = async (url: string, options: RequestInit = {}) => {
-  const headers = {
-    ...(options.headers || {}),
-    
-  };
+  console.log("Fetching URL:", url);
 
-  try {
+    const headers = {
+      ...options.headers,
+      'Accept-Language': 'en',
+    };
+
+     try {
     const response = await fetch(url, {
       ...options,
       headers
     });
 
+    console.log("Response Status:", response.status);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log("Response Data:", data);
+    return data;
   } catch (error) {
+    console.error("API Fetch Error:", error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "An unknown error occurred" 
     };
   }
 };
+
 
 
 

@@ -29,7 +29,7 @@ export default function Layout() {
         <div>
           <header className="flex justify-center items-center pb-4 mx-4 border-b">
             <Link to="/">
-              <img src="/logo.svg" alt="logo" width={50} />
+              <img src="/dark-logo.png" alt="logo" width={50} />
             </Link>
           </header>
           <div className="pt-4">

@@ -11,8 +11,8 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    lng: 'ar', 
-    fallbackLng: 'ar',
+    lng: 'en', 
+    fallbackLng: 'en',
     debug: true,
     interpolation: {
       escapeValue: false,
@@ -34,6 +34,6 @@ i18n
     },
   });
 
-localStorage.setItem('i18nextLng', 'ar');
+localStorage.setItem('i18nextLng', 'en');
 
 export default i18n;

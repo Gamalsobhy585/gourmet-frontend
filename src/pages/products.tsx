@@ -59,7 +59,7 @@ const Products = () => {
         sku: data.sku, 
         price: data.price,
         description:data.description,
-        price_in_store_B: data.price_in_store_B,
+        price_in_store_b: data.price_in_store_B,
         category_id: data.category_id,
         category: data.category,
         created_date: data.created_date,

@@ -21,7 +21,12 @@
     "price_store_b_label": "سعر المتجر ب",
     "id_label": "المعرف",
     "update_button": "تحديث المنتج",
-    "add_button": "إضافة منتج"
+    "add_button": "إضافة منتج",
+    "name_placeholder": "أدخل اسم المنتج",
+    "description_placeholder": "أدخل وصف المنتج",
+    "price_placeholder": "أدخل سعر المنتج",
+    "category_placeholder": "اختر تصنيفًا",
+    "sku_placeholder": "أدخل الرمز SKU"
   },
   "common": {
     "filter": "تصفية",

@@ -10,7 +10,7 @@ export interface Product {
     description: string;
     category_id: Category['id'];
     category?: Category; 
-    price_in_store_B: number;
+    price_in_store_b: number;
     created_date: string;
   }
 
