@@ -62,13 +62,47 @@ export const getProducts = async (params: ProductFilterParams = { page: 1 }) => 
   return apiFetch(url);
 };
 
+export const getCategories = async () => {
+  const url = buildUrl('/categories', {
+    per_page: 1000
+  });
+  
+  return apiFetch(url);
+};
+
+
+
+
+
+export const searchProductsWithFilters = async (options: {
+  query?: string;
+  category?: string;
+  price?:  number;
+  sku?: string;
+  created_date?: string;
+  page?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}) => {
+  const params: ProductFilterParams = {
+    page: options.page || 1,
+    query: options.query,
+    category: options.category,
+    sku: options.sku,
+    price: options.price, 
+    created_date: options.created_date,
+    sort_by: options.sortBy as any,
+    sort_direction: options.sortDirection
+  };
+
+  return getProducts(params);
+};
+
 export const getProduct = async (id: string) => {
   const url = `${import.meta.env.VITE_BASE_URL}/products/${id}`;
   const response = await apiFetch(url);
   return response.data;
 };
-
-
 
 export const createProduct = async (product: z.infer<typeof productSchema>) => {
   return apiFetch(`${import.meta.env.VITE_BASE_URL}/products`, {
