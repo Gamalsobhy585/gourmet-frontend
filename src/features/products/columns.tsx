@@ -2,7 +2,7 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { Product } from "./type";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Button } from "../../components/ui/button";
-import { SquarePen, Eye, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
@@ -42,7 +42,7 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
       ),
     },
     {
-      accessorKey: "SKU",
+      accessorKey: "sku",
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -54,7 +54,7 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
       ),
       cell: ({ row }) => (
         <div className={`${isRTL ? "text-center" : "text-center"}`}>
-          {row.getValue("SKU")}
+          {row.getValue("sku")}
         </div>
       ),
     },
@@ -162,12 +162,7 @@ export const getProductColumns = (isRTL: boolean): ColumnDef<Product>[] => {
               onClick={() => onEdit && onEdit(String(row.original))}
               aria-label={t("common.edit")}
             />
-            <Eye
-              size={24}
-              className="cursor-pointer hover:text-blue-500"
-              onClick={() => onShow && onShow(row.original)}
-              aria-label={t("common.view")}
-            />
+            
             <Trash2
               size={24}
               className="cursor-pointer hover:text-red-500"

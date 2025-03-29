@@ -119,6 +119,10 @@ export function ProductsTable({
     queryKey: ["categories"],
     queryFn: () => getCategories(),
   });
+  const categoriesForm = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+  console.log(categoriesForm);
+  
+
   useEffect(() => {
     if (categoriesData?.data && Array.isArray(categoriesData.data)) {
       const apiCategories = categoriesData.data.map((category: {name: string}) => category.name);
@@ -127,6 +131,7 @@ export function ProductsTable({
       setCategories(apiCategories);
     }
   }, [categoriesData]);
+  
   
   const [skuFilter, setSkuFilter] = useState("");
   const [priceFilter, setPriceFilter] = useState(0);
@@ -278,7 +283,7 @@ export function ProductsTable({
                       />
                     </DialogTrigger>
                     <DialogContent className="w-1/3 md:rounded-3xl">
-                      <AddProduct onAdd={onAdd} />
+                      <AddProduct onAdd={onAdd} categories={categoriesForm} />
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -372,6 +377,7 @@ export function ProductsTable({
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="w-1/3 md:rounded-3xl">
           <AddProduct
+          categories={categoriesData}
             isEditMode={true}
             initialData={selectedProduct}
             onSubmit={(data) =>

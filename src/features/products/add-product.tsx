@@ -25,10 +25,13 @@ interface AddProductProps {
   isViewMode?: boolean;
   isEditMode?: boolean;
   initialData?: Product | null;
+  categories?: { id: number; name: string }[]; 
+
 }
 
 export function AddProduct({
   onAdd,
+  categories = [],
   onSubmit,
   isViewMode = false,
   isEditMode = false,
@@ -48,6 +51,8 @@ export function AddProduct({
     },
   });
 
+  console.log(categories);
+  
   useEffect(() => {
     if (initialData) {
       form.reset({
@@ -153,38 +158,44 @@ export function AddProduct({
             <FormItem className={`${isRTL ? "text-right" : "text-left"}`}>
               <FormLabel>{t("product.category_label")}</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("product.category_placeholder")}
+                <select
+                  className="border p-2 rounded w-full"
                   disabled={isViewMode}
-                  dir={isRTL ? "rtl" : "ltr"}
+                  value={field.value}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                >
+                  <option value="">{t("product.category_placeholder")}</option>
+                  {categories?.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* sku Field */}
-        <FormField
-          name="sku"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className={`${isRTL ? "text-right" : "text-left"}`}>
-              <FormLabel>{t("product.sku_label")}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t("product.sku_placeholder")}
-                  disabled={isViewMode}
-                  dir={isRTL ? "rtl" : "ltr"}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            name="sku"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className={`${isRTL ? "text-right" : "text-left"}`}>
+                <FormLabel>{t("product.sku_label")}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t("product.sku_placeholder")}
+                    disabled={isViewMode}
+                    dir={isRTL ? "rtl" : "ltr"}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
 
         {/* Submit Button */}
         {!isViewMode && (
