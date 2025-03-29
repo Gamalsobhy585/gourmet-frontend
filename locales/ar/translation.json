@@ -1,0 +1,51 @@
+{
+  "product": {
+    "title": "إدارة المنتجات",
+    "delete_success": "تم حذف المنتج بنجاح",
+    "delete_error": "فشل في حذف المنتج",
+    "confirm_delete": "هل أنت متأكد أنك تريد حذف هذا المنتج؟",
+    "search_placeholder": "ابحث عن المنتجات...",
+    "filter_description": "استخدم الفلاتر لتصفية البحث",
+    "category": "التصنيف",
+    "select_category": "اختر تصنيفًا",
+    "sku": "الرمز SKU",
+    "enter_sku": "أدخل الرمز SKU",
+    "price_range": "نطاق السعر",
+    "date_range": "نطاق التاريخ",
+    "select_date_range": "حدد نطاق التاريخ",
+    "name_label": "اسم المنتج",
+    "description_label": "الوصف",
+    "category_label": "التصنيف",
+    "sku_label": "الرمز SKU",
+    "price_label": "السعر",
+    "price_store_b_label": "سعر المتجر ب",
+    "id_label": "المعرف",
+    "update_button": "تحديث المنتج",
+    "add_button": "إضافة منتج"
+  },
+  "common": {
+    "filter": "تصفية",
+    "clear": "مسح",
+    "apply": "تطبيق",
+    "previous": "السابق",
+    "next": "التالي",
+    "no_results": "لم يتم العثور على نتائج",
+    "showing_results": "عرض النتائج",
+    "select_all": "تحديد الكل",
+    "select_row": "تحديد الصف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "actions_label": "الإجراءات",
+    "min": "الأدنى",
+    "max": "الأقصى"
+  },
+  "product_validation": {
+    "name_required": "اسم المنتج مطلوب",
+    "price_min": "يجب أن يكون السعر 0 على الأقل",
+    "category_required": "التصنيف مطلوب",
+    "SKU_required": "الرمز SKU مطلوب"
+  },
+  "products":"المنتجات"
+
+}
