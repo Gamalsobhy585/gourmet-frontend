@@ -68,6 +68,8 @@ export const getProduct = async (id: string) => {
   return response.data;
 };
 
+
+
 export const createProduct = async (product: z.infer<typeof productSchema>) => {
   return apiFetch(`${import.meta.env.VITE_BASE_URL}/products`, {
     method: "POST",
@@ -97,30 +99,3 @@ export const deleteProduct = async (id: string) => {
   });
 };
 
-export const searchProductsWithFilters = async (options: {
-  query?: string;
-  category?: string;
-  priceRange?: {min: number, max: number};
-  dateRange?: {start: string, end: string};
-  page?: number;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
-}) => {
-  const params: ProductFilterParams = {
-    page: options.page || 1,
-    query: options.query,
-    category: options.category,
-    sort_by: options.sortBy as any,
-    sort_direction: options.sortDirection
-  };
-
-  if (options.priceRange) {
-    params.price_range = `${options.priceRange.min}-${options.priceRange.max}`;
-  }
-
-  if (options.dateRange) {
-    params.created_date_range = `${options.dateRange.start} to ${options.dateRange.end}`;
-  }
-
-  return getProducts(params);
-};
