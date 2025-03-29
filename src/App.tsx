@@ -5,22 +5,10 @@ import Layout from "./components/layout";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import Loader from "./components/loader";
-
-
-
 const Products = React.lazy(() => import("./pages/products"));
-
-
-
-
-
-
-
-
 const App: React.FC = () => {
-  const queryClient = new QueryClient();
-
-  const publicRoutes = [
+const queryClient = new QueryClient();
+const publicRoutes = [
     { path: "/", element: <Products /> },
    
   ];
