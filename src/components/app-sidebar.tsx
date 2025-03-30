@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { NavMain } from "@/components/nav-main";
-import { SidebarOptInForm } from "@/components/sidebar-opt-in-form";
+import { NavMain } from "../components/nav-main";
+import { SidebarOptInForm } from "../components/sidebar-opt-in-form";
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +9,7 @@ import {
   SidebarHeader,
   SidebarRail,
   SidebarSeparator,
-} from "@/components/ui/sidebar";
+} from "../components/ui/sidebar";
 
 const data = {
   navMain: [
