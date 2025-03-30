@@ -3,7 +3,7 @@ import { productSchema } from "./schemas";
 import { ProductFilterParams } from "./type";
 
 
-
+const PAGE_SIZE = 5;
 
 const buildUrl = (endpoint: string, params: Record<string, any>) => {
   const url = new URL(`${import.meta.env.VITE_BASE_URL}${endpoint}`);
@@ -16,7 +16,7 @@ const buildUrl = (endpoint: string, params: Record<string, any>) => {
   
   return url.toString();
 };
-console.log("Final API URL:", buildUrl('/products', { page: 1, per_page: 20 }));
+console.log("Final API URL:", buildUrl('/products', { page: 1, per_page: 5 }));
 
 const apiFetch = async (url: string, options: RequestInit = {}) => {
   console.log("Fetching URL:", url);
@@ -56,7 +56,7 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
 export const getProducts = async (params: ProductFilterParams = { page: 1 }) => {
   const url = buildUrl('/products', {
     ...params,
-    per_page: params.per_page || 20
+    per_page: params.per_page || PAGE_SIZE
   });
   
   return apiFetch(url);

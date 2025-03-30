@@ -56,8 +56,13 @@ import { useQuery } from "@tanstack/react-query";
     products: Product[];
     isLoading: boolean;
     error: string | null;
-    currentPage: number;
     totalPages?: number;
+    pagination?: {
+      from: number;
+      to: number;
+      total: number;
+    };
+    currentPage: number;
     onPageChange: (page: number) => void;
     searchQuery: string;
     onSearchChange: (query: string) => void;
@@ -93,7 +98,7 @@ export function ProductsTable({
   error,
   currentPage,
   totalPages = 1,
-  onPageChange,
+  pagination = { from: 1, to: products.length, total: products.length },  onPageChange,
   searchQuery,
   onSearchChange,
   onFilterChange,
@@ -341,32 +346,32 @@ export function ProductsTable({
             </div>
             
             <div className="flex items-center justify-between space-x-2 py-4">
-              <div className="text-sm text-muted-foreground">
-                {t("common.showing_results", {
-                  from: (currentPage - 1) * 20 + 1,
-                  to: Math.min(currentPage * 20, products.length),
-                  total: products.length,
-                })}
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onPageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  {t("common.previous")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onPageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
-                >
-                  {t("common.next")}
-                </Button>
-              </div>
-            </div>
+          <div className="text-sm text-muted-foreground">
+            {t("common.showing_results", {
+              from: pagination.from,
+              to: pagination.to,
+              total: pagination.total,
+            })}
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              {t("common.previous")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+            >
+              {t("common.next")}
+            </Button>
+          </div>
+        </div>
           </>
         )}
       </CardContent>

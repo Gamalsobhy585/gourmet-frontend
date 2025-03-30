@@ -42,7 +42,7 @@ const Products = () => {
       sortDirection: filters.sort_direction,
     }),
   });
-  
+
 
 
   
@@ -60,9 +60,8 @@ const Products = () => {
   });
 
   const handleDelete = (id: string) => {
-    if (window.confirm(t("product.confirm_delete"))) {
       deleteMutation.mutate(id);
-    }
+   
   };
 
   const addMutation = useMutation({
@@ -127,10 +126,15 @@ const Products = () => {
         onUpdate={(params) => updateMutation.mutate(params)}
         selectedProduct={selectedProduct}
         setSelectedProduct={setSelectedProduct}
-        totalPages={data?.meta?.last_page || 1}
         onFilterChange={handleFilterChange}
         onSortChange={handleSortChange}
         filters={filters}
+        totalPages={data?.pagination?.total_pages || 1}
+        pagination={{
+          from: data?.pagination?.from || 1,
+          to: data?.pagination?.to || 0,
+          total: data?.pagination?.total || 0
+        }}
       />
     </>
   );
